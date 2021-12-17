@@ -4,15 +4,16 @@ import numpy as np
 
 # step 1
 sys.setrecursionlimit(2500)
+TEST_SIZE = 10
 
 risk_mat = None
 if len(sys.argv) > 1:
     src = sys.argv[1]
 else:
-    src = "./input"
+    src = None
 
-with open(src, newline="") as inp:
-
+if src:
+    inp = open(src, newline="")
     inp_arr = []
 
     for i in inp:
@@ -20,16 +21,18 @@ with open(src, newline="") as inp:
         inp_arr.append(arr)
 
     base_risk_mat = np.array(inp_arr)
+else:
+    base_risk_mat = np.random.randint(1, 10, (TEST_SIZE, TEST_SIZE))
     
-    # Build the whole matrix with "spillage"
-    risk_mat = np.concatenate([(base_risk_mat + i) for i in range(5)], 1)
-    risk_mat = np.concatenate([(risk_mat + i) for i in range(5)], 0)
-    
-    # Implement the wrap around accounting for extra +1 on wrap
-    risk_mat = (risk_mat + risk_mat // 10) % 10
+# Build the whole matrix with "spillage"
+risk_mat = np.concatenate([(base_risk_mat + i) for i in range(5)], 1)
+risk_mat = np.concatenate([(risk_mat + i) for i in range(5)], 0)
 
-    print(risk_mat)
-    print(risk_mat.shape)
+# Implement the wrap around accounting for extra +1 on wrap
+risk_mat = (risk_mat + risk_mat // 10) % 10
+
+print(risk_mat)
+print(risk_mat.shape)
 # step 2
 # methods defining adjacent nodes
 
@@ -55,7 +58,7 @@ MAX = (DIM ** 2) * 9
 # This definition for the minimum is starting off way to large, lets bound it a bit tighter with a trivial initial
 # solution
 
-MIN = sum(risk_mat[0]) + sum(np.transpose(risk_mat)[0]) - risk_mat[0][0]
+MIN = 0
 min_matrix = np.zeros(risk_mat.shape)
 initial_pos = (0, 0)
 initial_risk = 0
@@ -63,7 +66,7 @@ initial_risk = 0
 path = None
 
 def search(risk, pos, visited):
-    global path, min_matrix
+    global path, min_matrix, MIN
     # make sure we're using the right min, max
     x = pos[0]
     y = pos[1]
@@ -72,6 +75,7 @@ def search(risk, pos, visited):
         min_matrix[y][x] = risk
         if y == DIM - 1 and x == DIM - 1:
             path = visited + [pos]
+            MIN = risk
     else:
         return
     
