@@ -63,7 +63,7 @@ if __name__ == "__main__":
     ss = decode.build_input(sys.argv[1])
 
     first = ss[0]
-    second = ss[24]
+    second = ss[11]
 
     theta = np.radians(90)
     c, s = np.cos(theta), np.sin(theta)
@@ -76,9 +76,13 @@ if __name__ == "__main__":
     points1 = first.beacons[m[..., 0]]
     points1 = points1 - np.mean(points1, axis=0)
     points2 = second.beacons[m[..., 1]]
+    rot = Ry.dot(Ry).dot(Rx).dot(Rx).dot(Rx).dot(Rz).dot(Rz).dot(np.array([[-1, 0, 0], [0, -1, 0], [0, 0, 1]]))
+    points2 = points2.dot(rot)
     points2 = points2 - np.mean(points2, axis=0)
-    #points2 = points2.dot(Ry).dot(Rx).dot(Rx).dot(Rx)
 
+    print(np.linalg.norm(points1, axis=1))
+    print(np.linalg.norm(points2, axis=1))
+    
     ax = plt.axes(projection='3d')
 
     ax.scatter3D(points1[..., 0], points1[..., 1], points1[..., 2], \
